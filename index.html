@@ -9,7 +9,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>Budget Tracker</h1>
+            <div class="header-top">
+                <h1>Budget Tracker</h1>
+                <button class="new-month-btn" onclick="budgetTracker.newMonth()">New Month</button>
+            </div>
             <div class="remaining-budget">
                 <span class="label">Remaining Budget:</span>
                 <span class="amount" id="remainingAmount">$0.00</span>
@@ -17,12 +20,28 @@
         </header>
 
         <main>
+            <section class="spending-section">
+                <h2>Daily Spending</h2>
+                <form id="spendingForm">
+                    <div class="form-group">
+                        <label for="spendingAmount">Amount:</label>
+                        <input type="number" id="spendingAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="spendingDescription">Description:</label>
+                        <input type="text" id="spendingDescription" placeholder="e.g., Coffee, Groceries">
+                    </div>
+                    <button type="submit">Record Spending</button>
+                </form>
+                <div id="spendingList" class="entry-list"></div>
+            </section>
+
             <section class="income-section">
                 <h2>Monthly Income</h2>
                 <form id="incomeForm">
                     <div class="form-group">
-                        <label for="incomeDate">Date:</label>
-                        <input type="date" id="incomeDate" required>
+                        <label for="incomeDay">Day:</label>
+                        <input type="number" id="incomeDay" min="1" max="31" placeholder="Day of month" required>
                     </div>
                     <div class="form-group">
                         <label for="incomeAmount">Amount:</label>
@@ -41,8 +60,8 @@
                         <input type="number" id="expenseAmount" step="0.01" min="0" required>
                     </div>
                     <div class="form-group">
-                        <label for="expenseDate">Due Date (optional):</label>
-                        <input type="date" id="expenseDate">
+                        <label for="expenseDay">Due Day (optional):</label>
+                        <input type="number" id="expenseDay" min="1" max="31" placeholder="Day of month">
                     </div>
                     <div class="form-group">
                         <label for="expenseDescription">Description:</label>
@@ -51,22 +70,6 @@
                     <button type="submit">Add Fixed Expense</button>
                 </form>
                 <div id="expensesList" class="entry-list"></div>
-            </section>
-
-            <section class="spending-section">
-                <h2>Daily Spending</h2>
-                <form id="spendingForm">
-                    <div class="form-group">
-                        <label for="spendingAmount">Amount:</label>
-                        <input type="number" id="spendingAmount" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="spendingDescription">Description:</label>
-                        <input type="text" id="spendingDescription" placeholder="e.g., Coffee, Groceries">
-                    </div>
-                    <button type="submit">Record Spending</button>
-                </form>
-                <div id="spendingList" class="entry-list"></div>
             </section>
         </main>
     </div>

@@ -19,16 +19,42 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 30px;
     background: white;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 0 0 10px 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin-bottom: 0;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
 h1 {
     color: #2c3e50;
-    margin-bottom: 15px;
+    margin: 0;
+}
+
+.new-month-btn {
+    background: #e67e22;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.new-month-btn:hover {
+    background: #d35400;
 }
 
 .remaining-budget {
@@ -47,6 +73,10 @@ h1 {
 
 .remaining-budget .amount.negative {
     color: #e74c3c;
+}
+
+main {
+    padding-top: 30px;
 }
 
 section {
@@ -166,9 +196,102 @@ button:hover {
     background: #c0392b;
 }
 
+.entry-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.edit-btn:hover {
+    background: #2980b9;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border: 2px solid #3498db;
+}
+
+.edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.edit-field label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+}
+
+.edit-field input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.save-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.save-btn:hover {
+    background: #219a52;
+}
+
+.cancel-btn {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.cancel-btn:hover {
+    background: #7f8c8d;
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 10px;
+    }
+    
+    .header-top {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .new-month-btn {
+        padding: 8px 12px;
+        font-size: 12px;
     }
     
     form {
