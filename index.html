@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Budget Tracker</h1>
+            <div class="remaining-budget">
+                <span class="label">Remaining Budget:</span>
+                <span class="amount" id="remainingAmount">$0.00</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="income-section">
+                <h2>Monthly Income</h2>
+                <form id="incomeForm">
+                    <div class="form-group">
+                        <label for="incomeDate">Date:</label>
+                        <input type="date" id="incomeDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="incomeAmount">Amount:</label>
+                        <input type="number" id="incomeAmount" step="0.01" min="0" required>
+                    </div>
+                    <button type="submit">Add Income</button>
+                </form>
+                <div id="incomeList" class="entry-list"></div>
+            </section>
+
+            <section class="expenses-section">
+                <h2>Fixed Expenses</h2>
+                <form id="expensesForm">
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount:</label>
+                        <input type="number" id="expenseAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDate">Due Date (optional):</label>
+                        <input type="date" id="expenseDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseDescription">Description:</label>
+                        <input type="text" id="expenseDescription" placeholder="e.g., Rent, Utilities">
+                    </div>
+                    <button type="submit">Add Fixed Expense</button>
+                </form>
+                <div id="expensesList" class="entry-list"></div>
+            </section>
+
+            <section class="spending-section">
+                <h2>Daily Spending</h2>
+                <form id="spendingForm">
+                    <div class="form-group">
+                        <label for="spendingAmount">Amount:</label>
+                        <input type="number" id="spendingAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="spendingDescription">Description:</label>
+                        <input type="text" id="spendingDescription" placeholder="e.g., Coffee, Groceries">
+                    </div>
+                    <button type="submit">Record Spending</button>
+                </form>
+                <div id="spendingList" class="entry-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
