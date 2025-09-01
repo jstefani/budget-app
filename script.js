@@ -36,6 +36,7 @@ class BudgetTracker {
             this.user = user;
             this.useCloud = true;
             this.hideUpgradeButton();
+            this.showUserInfo(user.email);
             this.updateSyncStatus('synced', 'Synced');
             await this.loadCloudData();
         } else {
@@ -71,6 +72,7 @@ class BudgetTracker {
                 this.hideAuthModal();
                 this.hideUpgradeModal();
                 this.hideUpgradeButton();
+                this.showUserInfo(session.user.email);
                 this.updateSyncStatus('syncing', 'Syncing...');
                 this.syncLocalToCloud().then(() => {
                     this.updateSyncStatus('synced', 'Synced');
@@ -78,6 +80,7 @@ class BudgetTracker {
             } else if (event === 'SIGNED_OUT') {
                 this.user = null;
                 this.useCloud = false;
+                this.hideUserInfo();
                 this.updateSyncStatus('offline', 'Local only');
                 this.showUpgradeButton();
             }
@@ -114,6 +117,15 @@ class BudgetTracker {
         document.getElementById('upgradeAccountBtn').style.display = 'none';
     }
 
+    showUserInfo(email) {
+        document.getElementById('userEmail').textContent = email;
+        document.getElementById('userInfo').style.display = 'flex';
+    }
+
+    hideUserInfo() {
+        document.getElementById('userInfo').style.display = 'none';
+    }
+
     showUpgradeModal() {
         document.getElementById('upgradeModal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
@@ -128,6 +140,16 @@ class BudgetTracker {
         this.hideUpgradeModal();
         this.showAuthModal();
         this.auth.showWelcome();
+    }
+
+    async logout() {
+        try {
+            await supabaseClient.auth.signOut();
+            // Auth state change listener will handle the UI updates
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('Error signing out: ' + error.message);
+        }
     }
 
     async handleUpgrade(e) {
