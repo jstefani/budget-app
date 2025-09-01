@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 :root {
     --primary: #1a1a1a;
     --secondary: #6b7280;
@@ -57,6 +61,24 @@ header {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
 }
 
 .header-actions {
@@ -436,6 +458,10 @@ button:active {
         gap: 16px;
         align-items: center;
         margin-bottom: 16px;
+    }
+
+    .header-nav {
+        gap: 20px;
     }
 
     .new-month-btn {

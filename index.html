@@ -12,6 +12,10 @@
         <header>
             <div class="header-top">
                 <h1>Budget Tracker</h1>
+                <nav class="header-nav">
+                    <a href="#income-section" class="nav-link">Income</a>
+                    <a href="#expenses-section" class="nav-link">Expenses</a>
+                </nav>
                 <div class="header-actions">
                     <button id="upgradeAccountBtn" class="upgrade-btn" onclick="budgetTracker.showUpgradeModal()" style="display: none;">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -53,7 +57,7 @@
                 <div id="spendingList" class="entry-list"></div>
             </section>
 
-            <section class="income-section">
+            <section id="income-section" class="income-section">
                 <h2>Monthly Income</h2>
                 <form id="incomeForm">
                     <div class="form-group">
@@ -69,7 +73,7 @@
                 <div id="incomeList" class="entry-list"></div>
             </section>
 
-            <section class="expenses-section">
+            <section id="expenses-section" class="expenses-section">
                 <h2>Fixed Expenses</h2>
                 <form id="expensesForm">
                     <div class="form-group">
