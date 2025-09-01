@@ -1176,11 +1176,49 @@ button:active {
     color: var(--text-primary);
 }
 
+.upgrade-modal .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.upgrade-modal .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.upgrade-modal input[type="email"],
+.upgrade-modal input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 16px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.upgrade-modal input[type="email"]:focus,
+.upgrade-modal input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+}
+
+.upgrade-modal input::placeholder {
+    color: var(--text-light);
+}
+
 .upgrade-buttons {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-top: 24px;
+    align-items: center;
 }
 
 .upgrade-btn-modal {
