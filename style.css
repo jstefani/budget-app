@@ -59,6 +59,50 @@ header {
     margin-bottom: 20px;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sync-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+}
+
+.sync-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-light);
+}
+
+.sync-icon.syncing {
+    background: var(--warning);
+    animation: pulse 1.5s infinite;
+}
+
+.sync-icon.synced {
+    background: var(--success);
+}
+
+.sync-icon.offline {
+    background: var(--text-light);
+}
+
+@keyframes pulse {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
 h1 {
     font-size: 24px;
     font-weight: 700;

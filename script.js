@@ -35,12 +35,19 @@ class BudgetTracker {
         if (user) {
             this.user = user;
             this.useCloud = true;
+            this.hideUpgradeButton();
+            this.updateSyncStatus('synced', 'Synced');
             await this.loadCloudData();
         } else {
             // Check if they have local data
             this.loadLocalData();
-            if (this.hasLocalData()) {
-                // Show auth modal to offer cloud sync
+            this.updateSyncStatus('offline', 'Local only');
+            if (this.hasLocalData() && !this.hasSeenAuthModal()) {
+                // Show auth modal to offer cloud sync for first time
+                this.showAuthModal();
+                this.markAuthModalSeen();
+            } else if (!this.hasLocalData()) {
+                // New user - show auth modal before onboarding
                 this.showAuthModal();
             }
         }
@@ -62,16 +69,31 @@ class BudgetTracker {
                 this.user = session.user;
                 this.useCloud = true;
                 this.hideAuthModal();
-                this.syncLocalToCloud();
+                this.hideUpgradeModal();
+                this.hideUpgradeButton();
+                this.updateSyncStatus('syncing', 'Syncing...');
+                this.syncLocalToCloud().then(() => {
+                    this.updateSyncStatus('synced', 'Synced');
+                });
             } else if (event === 'SIGNED_OUT') {
                 this.user = null;
                 this.useCloud = false;
+                this.updateSyncStatus('offline', 'Local only');
+                this.showUpgradeButton();
             }
         });
     }
 
     hasLocalData() {
         return this.income.length > 0 || this.fixedExpenses.length > 0 || this.dailySpending.length > 0;
+    }
+
+    hasSeenAuthModal() {
+        return localStorage.getItem('budgetTracker_seenAuthModal') === 'true';
+    }
+
+    markAuthModalSeen() {
+        localStorage.setItem('budgetTracker_seenAuthModal', 'true');
     }
 
     showAuthModal() {
@@ -82,6 +104,81 @@ class BudgetTracker {
     hideAuthModal() {
         document.getElementById('authModal').style.display = 'none';
         document.body.style.overflow = 'auto';
+    }
+
+    showUpgradeButton() {
+        document.getElementById('upgradeAccountBtn').style.display = 'inline-flex';
+    }
+
+    hideUpgradeButton() {
+        document.getElementById('upgradeAccountBtn').style.display = 'none';
+    }
+
+    showUpgradeModal() {
+        document.getElementById('upgradeModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    hideUpgradeModal() {
+        document.getElementById('upgradeModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    async handleUpgrade(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('upgradeEmail').value;
+        const password = document.getElementById('upgradePassword').value;
+        
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password
+            });
+            
+            if (error) {
+                alert('Account creation failed: ' + error.message);
+                return;
+            }
+            
+            if (data.user && !data.user.email_confirmed_at) {
+                alert('Please check your email and click the confirmation link to complete account creation. Your local data will be synced once confirmed.');
+            }
+            
+            this.hideUpgradeModal();
+            // Auth state change will handle the rest
+        } catch (error) {
+            alert('Account creation error: ' + error.message);
+        }
+    }
+
+    showSyncStatus() {
+        document.getElementById('syncStatus').style.display = 'flex';
+    }
+
+    hideSyncStatus() {
+        document.getElementById('syncStatus').style.display = 'none';
+    }
+
+    updateSyncStatus(status, text) {
+        const icon = document.getElementById('syncStatusIcon');
+        const textElement = document.getElementById('syncStatusText');
+        
+        // Remove all status classes
+        icon.classList.remove('syncing', 'synced', 'offline');
+        
+        // Add new status class
+        if (status) {
+            icon.classList.add(status);
+        }
+        
+        // Update text
+        if (text) {
+            textElement.textContent = text;
+        }
+        
+        // Show status if hidden
+        this.showSyncStatus();
     }
 
     initializeEventListeners() {
@@ -120,6 +217,11 @@ class BudgetTracker {
 
         document.getElementById('signupForm').addEventListener('submit', (e) => {
             this.auth.handleSignup(e);
+        });
+
+        // Upgrade form listener
+        document.getElementById('upgradeForm').addEventListener('submit', (e) => {
+            this.handleUpgrade(e);
         });
     }
 
@@ -411,6 +513,8 @@ class BudgetTracker {
     async saveToCloud() {
         if (!this.user) return;
         
+        this.updateSyncStatus('syncing', 'Saving...');
+        
         try {
             const budgetData = {
                 user_id: this.user.id,
@@ -427,11 +531,15 @@ class BudgetTracker {
 
             if (error) {
                 console.error('Error saving to cloud:', error);
+                this.updateSyncStatus('offline', 'Save failed - using local');
                 // Fallback to local save
                 this.saveToLocal();
+            } else {
+                this.updateSyncStatus('synced', 'Synced');
             }
         } catch (error) {
             console.error('Error saving to cloud:', error);
+            this.updateSyncStatus('offline', 'Save failed - using local');
             this.saveToLocal();
         }
     }
@@ -982,6 +1090,14 @@ const authFlow = {
             alert('Signup error: ' + error.message);
             this.showSignup();
         }
+    },
+
+    continueAsGuest() {
+        budgetTracker.useCloud = false;
+        budgetTracker.hideAuthModal();
+        budgetTracker.updateSyncStatus('offline', 'Local only');
+        // Show upgrade button since user is now in guest mode
+        budgetTracker.showUpgradeButton();
     },
 
     continueOffline() {

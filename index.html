@@ -12,6 +12,19 @@
         <header>
             <div class="header-top">
                 <h1>Budget Tracker</h1>
+                <div class="header-actions">
+                    <div id="syncStatus" class="sync-status" style="display: none;">
+                        <div id="syncStatusIcon" class="sync-icon"></div>
+                        <span id="syncStatusText">Local only</span>
+                    </div>
+                    <button id="upgradeAccountBtn" class="upgrade-btn" onclick="budgetTracker.showUpgradeModal()" style="display: none;">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                            <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+                        </svg>
+                        Create Account
+                    </button>
+                </div>
             </div>
             <div class="remaining-budget">
                 <span class="label">Remaining Budget</span>
@@ -256,7 +269,20 @@
     <!-- Authentication Modal -->
     <div id="authModal" class="auth-overlay" style="display: none;">
         <div class="auth-modal">
-            <div id="auth-login" class="auth-step active">
+            <div id="auth-welcome" class="auth-step active">
+                <h2>Welcome to Budget Tracker</h2>
+                <p>Choose how you'd like to get started:</p>
+                <div class="auth-buttons">
+                    <button class="auth-btn primary" onclick="budgetTracker.auth.showLogin()">Sign In</button>
+                    <button class="auth-btn primary" onclick="budgetTracker.auth.showSignup()">Create Account</button>
+                    <button class="auth-btn guest" onclick="budgetTracker.auth.continueAsGuest()">Continue as Guest</button>
+                </div>
+                <div class="auth-info">
+                    <p class="guest-info">As a guest, your data is saved locally. You can create an account anytime to sync across devices.</p>
+                </div>
+            </div>
+
+            <div id="auth-login" class="auth-step">
                 <h2>Welcome Back</h2>
                 <p>Sign in to sync your budget across all devices</p>
                 <form id="loginForm">
@@ -270,12 +296,9 @@
                     </div>
                     <div class="auth-buttons">
                         <button type="submit" class="auth-btn primary">Sign In</button>
-                        <button type="button" class="auth-btn secondary" onclick="budgetTracker.auth.showSignup()">Create Account</button>
+                        <button type="button" class="auth-btn secondary" onclick="budgetTracker.auth.showWelcome()">Back</button>
                     </div>
                 </form>
-                <div class="auth-options">
-                    <button class="auth-btn text" onclick="budgetTracker.auth.continueOffline()">Continue without account</button>
-                </div>
             </div>
 
             <div id="auth-signup" class="auth-step">
@@ -292,7 +315,7 @@
                     </div>
                     <div class="auth-buttons">
                         <button type="submit" class="auth-btn primary">Create Account</button>
-                        <button type="button" class="auth-btn secondary" onclick="budgetTracker.auth.showLogin()">Already have account?</button>
+                        <button type="button" class="auth-btn secondary" onclick="budgetTracker.auth.showWelcome()">Back</button>
                     </div>
                 </form>
             </div>
@@ -323,6 +346,42 @@
                 <button class="archive-btn primary" onclick="budgetTracker.archiveMonth()">Archive & Start New Month</button>
                 <button class="archive-btn secondary" onclick="budgetTracker.continueCurrentMonth()">Continue Current Month</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Upgrade Account Modal -->
+    <div id="upgradeModal" class="upgrade-overlay" style="display: none;">
+        <div class="upgrade-modal">
+            <h2>Create Your Account</h2>
+            <p>Create an account to sync your budget across all devices. Your current budget data will be preserved!</p>
+            <div class="upgrade-benefits">
+                <div class="benefit">
+                    <span class="benefit-icon">☁️</span>
+                    <span>Sync across all devices</span>
+                </div>
+                <div class="benefit">
+                    <span class="benefit-icon">🔒</span>
+                    <span>Secure cloud backup</span>
+                </div>
+                <div class="benefit">
+                    <span class="benefit-icon">📱</span>
+                    <span>Access anywhere</span>
+                </div>
+            </div>
+            <form id="upgradeForm">
+                <div class="form-group">
+                    <label for="upgradeEmail">Email:</label>
+                    <input type="email" id="upgradeEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="upgradePassword">Password:</label>
+                    <input type="password" id="upgradePassword" minlength="6" required>
+                </div>
+                <div class="upgrade-buttons">
+                    <button type="submit" class="upgrade-btn-modal primary">Create Account & Transfer Data</button>
+                    <button type="button" class="upgrade-btn-modal secondary" onclick="budgetTracker.hideUpgradeModal()">Maybe Later</button>
+                </div>
+            </form>
         </div>
     </div>
 
