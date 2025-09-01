@@ -1,10 +1,37 @@
+// Initialize Supabase
+const supabaseUrl = 'https://aibtxogpttxdgmclaupg.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpYnR4b2dwdHR4ZGdtY2xhdXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MDExNjcsImV4cCI6MjA3MjI3NzE2N30.SFUxC0MChiLaNBGEcgb-GSM7kWkvdLDgELywjBsAyxY';
+const { createClient } = supabase;
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
 class BudgetTracker {
     constructor() {
         this.income = [];
         this.fixedExpenses = [];
         this.dailySpending = [];
+        this.user = null;
+        this.useCloud = false;
         
-        this.loadData();
+        this.initializeAuth();
+    }
+
+    async initializeAuth() {
+        // Check if user is already logged in
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        if (user) {
+            this.user = user;
+            this.useCloud = true;
+            await this.loadCloudData();
+        } else {
+            // Check if they have local data
+            this.loadLocalData();
+            if (this.hasLocalData()) {
+                // Show auth modal to offer cloud sync
+                this.showAuthModal();
+            }
+        }
+        
         this.initializeEventListeners();
         this.updateDisplay();
         
@@ -12,6 +39,33 @@ class BudgetTracker {
         if (this.needsOnboarding()) {
             this.showOnboarding();
         }
+
+        // Listen for auth changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN') {
+                this.user = session.user;
+                this.useCloud = true;
+                this.hideAuthModal();
+                this.syncLocalToCloud();
+            } else if (event === 'SIGNED_OUT') {
+                this.user = null;
+                this.useCloud = false;
+            }
+        });
+    }
+
+    hasLocalData() {
+        return this.income.length > 0 || this.fixedExpenses.length > 0 || this.dailySpending.length > 0;
+    }
+
+    showAuthModal() {
+        document.getElementById('authModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    hideAuthModal() {
+        document.getElementById('authModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
 
     initializeEventListeners() {
@@ -41,6 +95,15 @@ class BudgetTracker {
 
         document.getElementById('onboardingAdditionalForm').addEventListener('submit', (e) => {
             this.onboarding.handleAdditionalSubmit(e);
+        });
+
+        // Authentication form listeners
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            this.auth.handleLogin(e);
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            this.auth.handleSignup(e);
         });
     }
 
@@ -264,7 +327,8 @@ class BudgetTracker {
         localStorage.setItem('budgetData', JSON.stringify(data));
     }
 
-    loadData() {
+    // Data loading methods
+    loadLocalData() {
         const savedData = localStorage.getItem('budgetData');
         if (savedData) {
             const data = JSON.parse(savedData);
@@ -272,6 +336,94 @@ class BudgetTracker {
             this.fixedExpenses = data.fixedExpenses || [];
             this.dailySpending = data.dailySpending || [];
         }
+    }
+
+    async loadCloudData() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('budget_data')
+                .select('*')
+                .eq('user_id', this.user.id)
+                .single();
+
+            if (error && error.code !== 'PGRST116') { // Not found error is ok for new users
+                console.error('Error loading cloud data:', error);
+                this.loadLocalData(); // Fallback to local
+                return;
+            }
+
+            if (data) {
+                this.income = data.income || [];
+                this.fixedExpenses = data.fixed_expenses || [];
+                this.dailySpending = data.daily_spending || [];
+            }
+        } catch (error) {
+            console.error('Error loading cloud data:', error);
+            this.loadLocalData(); // Fallback to local
+        }
+    }
+
+    loadData() {
+        if (this.useCloud) {
+            // Cloud data is already loaded in initializeAuth
+            return;
+        } else {
+            this.loadLocalData();
+        }
+    }
+
+    async saveData() {
+        if (this.useCloud && this.user) {
+            await this.saveToCloud();
+        } else {
+            this.saveToLocal();
+        }
+    }
+
+    saveToLocal() {
+        const data = {
+            income: this.income,
+            fixedExpenses: this.fixedExpenses,
+            dailySpending: this.dailySpending
+        };
+        localStorage.setItem('budgetData', JSON.stringify(data));
+    }
+
+    async saveToCloud() {
+        if (!this.user) return;
+        
+        try {
+            const budgetData = {
+                user_id: this.user.id,
+                income: this.income,
+                fixed_expenses: this.fixedExpenses,
+                daily_spending: this.dailySpending,
+                updated_at: new Date().toISOString()
+            };
+
+            const { error } = await supabaseClient
+                .from('budget_data')
+                .upsert(budgetData);
+
+            if (error) {
+                console.error('Error saving to cloud:', error);
+                // Fallback to local save
+                this.saveToLocal();
+            }
+        } catch (error) {
+            console.error('Error saving to cloud:', error);
+            this.saveToLocal();
+        }
+    }
+
+    async syncLocalToCloud() {
+        if (!this.user || !this.hasLocalData()) return;
+        
+        // Save current local data to cloud
+        await this.saveToCloud();
+        
+        // Clear local storage since we're now using cloud
+        localStorage.removeItem('budgetData');
     }
 
     editEntry(type, id) {
@@ -656,5 +808,84 @@ const onboardingFlow = {
 
 // Add onboarding to budget tracker
 BudgetTracker.prototype.onboarding = onboardingFlow;
+
+// Authentication functionality
+const authFlow = {
+    showLogin() {
+        document.querySelectorAll('.auth-step').forEach(step => step.classList.remove('active'));
+        document.getElementById('auth-login').classList.add('active');
+    },
+
+    showSignup() {
+        document.querySelectorAll('.auth-step').forEach(step => step.classList.remove('active'));
+        document.getElementById('auth-signup').classList.add('active');
+    },
+
+    showLoading() {
+        document.querySelectorAll('.auth-step').forEach(step => step.classList.remove('active'));
+        document.getElementById('auth-loading').classList.add('active');
+    },
+
+    async handleLogin(e) {
+        e.preventDefault();
+        this.showLoading();
+
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                alert('Login failed: ' + error.message);
+                this.showLogin();
+            }
+            // Success is handled by auth state change listener
+        } catch (error) {
+            alert('Login error: ' + error.message);
+            this.showLogin();
+        }
+    },
+
+    async handleSignup(e) {
+        e.preventDefault();
+        this.showLoading();
+
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password
+            });
+
+            if (error) {
+                alert('Signup failed: ' + error.message);
+                this.showSignup();
+                return;
+            }
+
+            if (data.user && !data.user.email_confirmed_at) {
+                alert('Please check your email and click the confirmation link to complete signup.');
+                this.showLogin();
+            }
+            // Success is handled by auth state change listener
+        } catch (error) {
+            alert('Signup error: ' + error.message);
+            this.showSignup();
+        }
+    },
+
+    continueOffline() {
+        budgetTracker.hideAuthModal();
+    }
+};
+
+// Add auth to budget tracker
+BudgetTracker.prototype.auth = authFlow;
 
 const budgetTracker = new BudgetTracker();

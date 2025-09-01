@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="container">
@@ -247,6 +248,57 @@
                 <div class="onboarding-buttons">
                     <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.finishOnboarding()">Start budgeting!</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="authModal" class="auth-overlay" style="display: none;">
+        <div class="auth-modal">
+            <div id="auth-login" class="auth-step active">
+                <h2>Welcome Back</h2>
+                <p>Sign in to sync your budget across all devices</p>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email:</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <div class="auth-buttons">
+                        <button type="submit" class="auth-btn primary">Sign In</button>
+                        <button type="button" class="auth-btn secondary" onclick="budgetTracker.auth.showSignup()">Create Account</button>
+                    </div>
+                </form>
+                <div class="auth-options">
+                    <button class="auth-btn text" onclick="budgetTracker.auth.continueOffline()">Continue without account</button>
+                </div>
+            </div>
+
+            <div id="auth-signup" class="auth-step">
+                <h2>Create Account</h2>
+                <p>Sync your budget data across all your devices</p>
+                <form id="signupForm">
+                    <div class="form-group">
+                        <label for="signupEmail">Email:</label>
+                        <input type="email" id="signupEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password:</label>
+                        <input type="password" id="signupPassword" minlength="6" required>
+                    </div>
+                    <div class="auth-buttons">
+                        <button type="submit" class="auth-btn primary">Create Account</button>
+                        <button type="button" class="auth-btn secondary" onclick="budgetTracker.auth.showLogin()">Already have account?</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="auth-loading" class="auth-step">
+                <h2>Setting up your account...</h2>
+                <div class="auth-spinner"></div>
             </div>
         </div>
     </div>
