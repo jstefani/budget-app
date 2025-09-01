@@ -12,7 +12,6 @@
         <header>
             <div class="header-top">
                 <h1>Budget Tracker</h1>
-                <button class="new-month-btn" onclick="budgetTracker.newMonth()">New Month</button>
             </div>
             <div class="remaining-budget">
                 <span class="label">Remaining Budget</span>
@@ -171,6 +170,7 @@
                 <p>It looks like every month you have <span id="totalIncomeAmount" class="highlight-amount">$0</span> to spend.</p>
                 <p>Next let's add recurring expenses like your housing, car, etc.</p>
                 <div class="onboarding-buttons">
+                    <button class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goBack()">Back</button>
                     <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.goToExpenses()">Next</button>
                 </div>
             </div>
@@ -237,6 +237,7 @@
                 <p class="instructions">Any time you spend money, open this app and add the money you spent. That's all.</p>
                 <p class="peace-of-mind">You'll find this gives you peace of mind - you'll always know where you stand financially.</p>
                 <div class="onboarding-buttons">
+                    <button class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goBack()">Back</button>
                     <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.finishOnboarding()">Start budgeting!</button>
                 </div>
             </div>
@@ -299,6 +300,28 @@
             <div id="auth-loading" class="auth-step">
                 <h2>Setting up your account...</h2>
                 <div class="auth-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Month Archive Modal -->
+    <div id="monthArchiveModal" class="month-archive-overlay" style="display: none;">
+        <div class="month-archive-modal">
+            <h2>New Month Detected!</h2>
+            <p>It's now <span id="newMonthName"></span>. Would you like to archive <span id="oldMonthName"></span> and start fresh?</p>
+            <div class="archive-summary">
+                <div class="archive-line">
+                    <span>Total spent last month:</span>
+                    <span id="lastMonthSpent">$0.00</span>
+                </div>
+                <div class="archive-line">
+                    <span>Budget remaining:</span>
+                    <span id="lastMonthRemaining">$0.00</span>
+                </div>
+            </div>
+            <div class="archive-buttons">
+                <button class="archive-btn primary" onclick="budgetTracker.archiveMonth()">Archive & Start New Month</button>
+                <button class="archive-btn secondary" onclick="budgetTracker.continueCurrentMonth()">Continue Current Month</button>
             </div>
         </div>
     </div>

@@ -813,6 +813,7 @@ button:active {
 .auth-step .form-group {
     text-align: left;
     margin-bottom: 20px;
+    display: block;
 }
 
 .auth-step label {
@@ -820,7 +821,8 @@ button:active {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    width: 100%;
 }
 
 .auth-step input {
@@ -925,5 +927,135 @@ button:active {
     
     .auth-step h2 {
         font-size: 20px;
+    }
+}
+
+/* Month Archive Modal Styles */
+.month-archive-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1200;
+    padding: 20px;
+}
+
+.month-archive-modal {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    max-width: 500px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+}
+
+.month-archive-modal h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.month-archive-modal p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.archive-summary {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 32px;
+}
+
+.archive-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.archive-line:last-child {
+    margin-bottom: 0;
+    font-weight: 600;
+    font-size: 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.archive-line span:first-child {
+    color: var(--text-secondary);
+}
+
+.archive-line span:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.archive-buttons {
+    display: flex;
+    gap: 16px;
+}
+
+.archive-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.archive-btn.primary {
+    background: var(--accent);
+    color: white;
+}
+
+.archive-btn.primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.archive-btn.secondary {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.archive-btn.secondary:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+    .month-archive-modal {
+        margin: 20px;
+        padding: 32px 24px;
+    }
+    
+    .archive-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .archive-line {
+        font-size: 14px;
+    }
+    
+    .archive-line:last-child {
+        font-size: 16px;
     }
 }

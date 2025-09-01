@@ -11,8 +11,21 @@ class BudgetTracker {
         this.dailySpending = [];
         this.user = null;
         this.useCloud = false;
+        this.currentMonth = this.getCurrentMonthKey();
+        this.lastActiveMonth = null;
         
         this.initializeAuth();
+    }
+
+    getCurrentMonthKey() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    getMonthName(monthKey) {
+        const [year, month] = monthKey.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
 
     async initializeAuth() {
@@ -34,6 +47,9 @@ class BudgetTracker {
         
         this.initializeEventListeners();
         this.updateDisplay();
+        
+        // Check for new month after loading data
+        this.checkForNewMonth();
         
         // Check if user needs onboarding
         if (this.needsOnboarding()) {
@@ -335,6 +351,7 @@ class BudgetTracker {
             this.income = data.income || [];
             this.fixedExpenses = data.fixedExpenses || [];
             this.dailySpending = data.dailySpending || [];
+            this.lastActiveMonth = data.lastActiveMonth || null;
         }
     }
 
@@ -356,6 +373,7 @@ class BudgetTracker {
                 this.income = data.income || [];
                 this.fixedExpenses = data.fixed_expenses || [];
                 this.dailySpending = data.daily_spending || [];
+                this.lastActiveMonth = data.last_active_month || null;
             }
         } catch (error) {
             console.error('Error loading cloud data:', error);
@@ -384,7 +402,8 @@ class BudgetTracker {
         const data = {
             income: this.income,
             fixedExpenses: this.fixedExpenses,
-            dailySpending: this.dailySpending
+            dailySpending: this.dailySpending,
+            lastActiveMonth: this.currentMonth
         };
         localStorage.setItem('budgetData', JSON.stringify(data));
     }
@@ -398,6 +417,7 @@ class BudgetTracker {
                 income: this.income,
                 fixed_expenses: this.fixedExpenses,
                 daily_spending: this.dailySpending,
+                last_active_month: this.currentMonth,
                 updated_at: new Date().toISOString()
             };
 
@@ -424,6 +444,79 @@ class BudgetTracker {
         
         // Clear local storage since we're now using cloud
         localStorage.removeItem('budgetData');
+    }
+
+    checkForNewMonth() {
+        // Skip if no previous data or in onboarding
+        if (!this.lastActiveMonth || this.needsOnboarding()) {
+            this.lastActiveMonth = this.currentMonth;
+            return;
+        }
+
+        // Check if we're in a new month
+        if (this.lastActiveMonth !== this.currentMonth && this.hasSpendingData()) {
+            this.showMonthArchivePrompt();
+        } else {
+            // Update to current month if no spending data
+            this.lastActiveMonth = this.currentMonth;
+        }
+    }
+
+    hasSpendingData() {
+        return this.dailySpending.length > 0;
+    }
+
+    showMonthArchivePrompt() {
+        const oldMonthName = this.getMonthName(this.lastActiveMonth);
+        const newMonthName = this.getMonthName(this.currentMonth);
+        
+        // Calculate last month's summary
+        const totalSpent = this.dailySpending.reduce((sum, entry) => sum + entry.amount, 0);
+        const totalIncome = this.income.reduce((sum, entry) => sum + entry.amount, 0);
+        const totalFixedExpenses = this.fixedExpenses.reduce((sum, entry) => sum + entry.amount, 0);
+        const remaining = totalIncome - totalFixedExpenses - totalSpent;
+        
+        // Update modal content
+        document.getElementById('oldMonthName').textContent = oldMonthName;
+        document.getElementById('newMonthName').textContent = newMonthName;
+        document.getElementById('lastMonthSpent').textContent = `$${totalSpent.toFixed(2)}`;
+        document.getElementById('lastMonthRemaining').textContent = `$${remaining.toFixed(2)}`;
+        
+        // Color the remaining amount
+        const remainingElement = document.getElementById('lastMonthRemaining');
+        remainingElement.style.color = remaining >= 0 ? 'var(--success)' : 'var(--danger)';
+        
+        // Show modal
+        document.getElementById('monthArchiveModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    archiveMonth() {
+        // Clear daily spending for new month
+        this.dailySpending = [];
+        this.lastActiveMonth = this.currentMonth;
+        
+        // Save and update display
+        this.saveData();
+        this.updateDisplay();
+        
+        // Hide modal
+        this.hideMonthArchiveModal();
+        
+        // Optional: Show success message
+        // alert(`Started new month! Daily spending cleared for ${this.getMonthName(this.currentMonth)}.`);
+    }
+
+    continueCurrentMonth() {
+        // Keep current data but update the last active month
+        this.lastActiveMonth = this.currentMonth;
+        this.saveData();
+        this.hideMonthArchiveModal();
+    }
+
+    hideMonthArchiveModal() {
+        document.getElementById('monthArchiveModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
 
     editEntry(type, id) {
@@ -582,23 +675,6 @@ class BudgetTracker {
         }
     }
 
-    newMonth() {
-        const spendingCount = this.dailySpending.length;
-        let confirmMessage = "Are you sure you want to start a new month?";
-        
-        if (spendingCount > 0) {
-            confirmMessage += `\n\nThis will clear all ${spendingCount} daily spending entries.`;
-        }
-        
-        confirmMessage += "\n\nYour income and fixed expenses will remain intact.";
-        
-        if (confirm(confirmMessage)) {
-            this.dailySpending = [];
-            this.saveData();
-            this.updateDisplay();
-            alert("New month started! Daily spending has been cleared.");
-        }
-    }
 
     needsOnboarding() {
         return this.income.length === 0 && this.fixedExpenses.length === 0 && this.dailySpending.length === 0;
@@ -640,11 +716,39 @@ const onboardingFlow = {
     },
 
     goBack() {
-        if (this.currentStep === 'income' || this.currentStep === 'bank') {
-            this.showStep('welcome');
-        } else if (this.currentStep === 'additional') {
-            this.showStep('income');
+        switch(this.currentStep) {
+            case 'income':
+            case 'bank':
+                // Clear any income data if going back to welcome
+                budgetTracker.income = [];
+                this.showStep('welcome');
+                break;
+            case 'additional':
+                this.showStep('income');
+                break;
+            case 'income-summary':
+                this.showStep('additional');
+                break;
+            case 'expenses':
+                this.showStep('income-summary');
+                break;
+            case 'final-summary':
+                // Clear expense data if going back to edit expenses
+                budgetTracker.fixedExpenses = [];
+                this.clearExpenseInputs();
+                this.showStep('expenses');
+                break;
+            default:
+                this.showStep('welcome');
+                break;
         }
+    },
+
+    clearExpenseInputs() {
+        // Clear all expense form inputs when going back
+        document.querySelectorAll('.expense-form input').forEach(input => {
+            input.value = '';
+        });
     },
 
     handleIncomeSubmit(e) {
