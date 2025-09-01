@@ -423,15 +423,19 @@ class BudgetTracker {
         entryDiv.className = 'entry-item';
         entryDiv.id = `entry-${entry.id}`;
         
+        // Create item name from description and date
+        const itemName = description || date;
+        
         entryDiv.innerHTML = `
-            <div class="details">
-                <div class="amount">${amount}</div>
-                <div class="date">${date}</div>
-                ${description ? `<div class="description">${description}</div>` : ''}
+            <div class="entry-left">
+                <div class="item-name">${itemName}</div>
+                <div class="entry-actions">
+                    <button class="edit-btn" onclick="budgetTracker.editEntry('${type}', ${entry.id})">Edit</button>
+                    <button class="delete-btn" onclick="budgetTracker.deleteEntry('${type}', ${entry.id})">Delete</button>
+                </div>
             </div>
-            <div class="entry-actions">
-                <button class="edit-btn" onclick="budgetTracker.editEntry('${type}', ${entry.id})">Edit</button>
-                <button class="delete-btn" onclick="budgetTracker.deleteEntry('${type}', ${entry.id})">Delete</button>
+            <div class="entry-right">
+                <div class="amount">${amount}</div>
             </div>
         `;
         
