@@ -12,10 +12,6 @@
         <header>
             <div class="header-top">
                 <h1>Budget Tracker</h1>
-                <nav class="header-nav">
-                    <a href="#income-section" class="nav-link">Income</a>
-                    <a href="#expenses-section" class="nav-link">Expenses</a>
-                </nav>
                 <div class="header-actions">
                     <button id="upgradeAccountBtn" class="upgrade-btn" onclick="budgetTracker.showUpgradeModal()" style="display: none;">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -37,6 +33,10 @@
                     <span class="days-left" id="daysLeft">0 days left in month</span>
                     <span class="daily-allowance">You can spend <span id="dailyAllowance">$0.00</span> per day</span>
                 </div>
+                <nav class="header-nav">
+                    <a href="#income-section" class="nav-link">Income</a>
+                    <a href="#expenses-section" class="nav-link">Expenses</a>
+                </nav>
             </div>
         </header>
 
