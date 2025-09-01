@@ -1023,6 +1023,11 @@ BudgetTracker.prototype.onboarding = onboardingFlow;
 
 // Authentication functionality
 const authFlow = {
+    showWelcome() {
+        document.querySelectorAll('.auth-step').forEach(step => step.classList.remove('active'));
+        document.getElementById('auth-welcome').classList.add('active');
+    },
+
     showLogin() {
         document.querySelectorAll('.auth-step').forEach(step => step.classList.remove('active'));
         document.getElementById('auth-login').classList.add('active');
