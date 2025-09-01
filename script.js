@@ -124,6 +124,12 @@ class BudgetTracker {
         document.body.style.overflow = 'auto';
     }
 
+    backToAuthFromUpgrade() {
+        this.hideUpgradeModal();
+        this.showAuthModal();
+        this.auth.showWelcome();
+    }
+
     async handleUpgrade(e) {
         e.preventDefault();
         
@@ -1034,8 +1040,9 @@ const authFlow = {
     },
 
     showSignup() {
-        document.querySelectorAll('.auth-step').forEach(step => step.classList.remove('active'));
-        document.getElementById('auth-signup').classList.add('active');
+        // Hide auth modal and show upgrade modal instead
+        budgetTracker.hideAuthModal();
+        budgetTracker.showUpgradeModal();
     },
 
     showLoading() {

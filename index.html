@@ -353,7 +353,7 @@
     <div id="upgradeModal" class="upgrade-overlay" style="display: none;">
         <div class="upgrade-modal">
             <h2>Create Your Account</h2>
-            <p>Create an account to sync your budget across all devices. Your current budget data will be preserved!</p>
+            <p>Create an account to sync your budget across all devices and access it anywhere!</p>
             <div class="upgrade-benefits">
                 <div class="benefit">
                     <span class="benefit-icon">☁️</span>
@@ -378,8 +378,8 @@
                     <input type="password" id="upgradePassword" minlength="6" required>
                 </div>
                 <div class="upgrade-buttons">
-                    <button type="submit" class="upgrade-btn-modal primary">Create Account & Transfer Data</button>
-                    <button type="button" class="upgrade-btn-modal secondary" onclick="budgetTracker.hideUpgradeModal()">Maybe Later</button>
+                    <button type="submit" class="upgrade-btn-modal primary">Create Account</button>
+                    <button type="button" class="upgrade-btn-modal secondary" onclick="budgetTracker.backToAuthFromUpgrade()">Back</button>
                 </div>
             </form>
         </div>
