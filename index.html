@@ -74,6 +74,179 @@
         </main>
     </div>
 
+    <!-- Onboarding Modal -->
+    <div id="onboardingModal" class="onboarding-overlay">
+        <div class="onboarding-modal">
+            <!-- Welcome Screen -->
+            <div id="onboarding-welcome" class="onboarding-step active">
+                <h2>Hi!</h2>
+                <p>This is an app to help you not be broke at the end of the month.</p>
+                <p>Let's get started - do you have a job or source of income?</p>
+                <p class="subtitle">If not, we can just start with however much money is in your bank account.</p>
+                <div class="onboarding-buttons">
+                    <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.goToIncome()">I have a job/income</button>
+                    <button class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goToBankAccount()">Money in my bank account</button>
+                </div>
+            </div>
+
+            <!-- Income Setup -->
+            <div id="onboarding-income" class="onboarding-step">
+                <h2>Income Setup</h2>
+                <form id="onboardingIncomeForm">
+                    <div class="form-group">
+                        <label for="onboardingIncomeAmount">Income amount:</label>
+                        <input type="number" id="onboardingIncomeAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="onboardingIncomeName">Name (optional):</label>
+                        <input type="text" id="onboardingIncomeName" placeholder="e.g., Main Job, Freelancing">
+                    </div>
+                    <div class="form-group">
+                        <label for="onboardingPayDays">What days are you paid on?</label>
+                        <input type="text" id="onboardingPayDays" placeholder="e.g., 1st and 15th, or just 30th">
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button type="button" class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goBack()">Back</button>
+                        <button type="submit" class="onboarding-btn primary">Continue</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bank Account Setup -->
+            <div id="onboarding-bank" class="onboarding-step">
+                <h2>Starting Amount</h2>
+                <form id="onboardingBankForm">
+                    <div class="form-group">
+                        <label for="onboardingBankAmount">How much money do you want to start with?</label>
+                        <input type="number" id="onboardingBankAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="onboarding-buttons">
+                        <button type="button" class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goBack()">Back</button>
+                        <button type="submit" class="onboarding-btn primary">Continue</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Additional Income -->
+            <div id="onboarding-additional" class="onboarding-step">
+                <h2>Additional Income</h2>
+                <p>Do you have any other monthly source of income you want to include?</p>
+                <div class="onboarding-buttons">
+                    <button class="onboarding-btn secondary" onclick="budgetTracker.onboarding.skipAdditional()">No, continue</button>
+                    <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.addAdditionalIncome()">Yes, add more income</button>
+                </div>
+                
+                <div id="additionalIncomeForm" class="additional-income-form" style="display: none;">
+                    <form id="onboardingAdditionalForm">
+                        <div class="form-group">
+                            <label for="onboardingAdditionalAmount">Additional income amount:</label>
+                            <input type="number" id="onboardingAdditionalAmount" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="onboardingAdditionalName">Name:</label>
+                            <input type="text" id="onboardingAdditionalName" placeholder="e.g., Side hustle, Rental income">
+                        </div>
+                        <div class="form-group">
+                            <label for="onboardingAdditionalDays">Payment days (optional):</label>
+                            <input type="text" id="onboardingAdditionalDays" placeholder="e.g., 5th of month">
+                        </div>
+                        <div class="onboarding-buttons">
+                            <button type="submit" class="onboarding-btn primary">Add This Income</button>
+                        </div>
+                    </form>
+                    <div class="onboarding-buttons">
+                        <button class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goToIncomeSummary()">Continue to expenses</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Summary -->
+            <div id="onboarding-income-summary" class="onboarding-step">
+                <h2>Great!</h2>
+                <p>It looks like every month you have <span id="totalIncomeAmount" class="highlight-amount">$0</span> to spend.</p>
+                <p>Next let's add recurring expenses like your housing, car, etc.</p>
+                <div class="onboarding-buttons">
+                    <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.goToExpenses()">Next</button>
+                </div>
+            </div>
+
+            <!-- Expenses Setup -->
+            <div id="onboarding-expenses" class="onboarding-step">
+                <h2>Monthly Expenses</h2>
+                <p>Let's add your recurring monthly expenses:</p>
+                
+                <div class="expense-categories">
+                    <div class="expense-category">
+                        <h3>Housing</h3>
+                        <form class="expense-form">
+                            <input type="number" placeholder="Rent/Mortgage" step="0.01" min="0" data-name="Rent/Mortgage">
+                            <input type="number" placeholder="Utilities (optional)" step="0.01" min="0" data-name="Utilities">
+                            <input type="number" placeholder="Internet (optional)" step="0.01" min="0" data-name="Internet">
+                        </form>
+                    </div>
+                    
+                    <div class="expense-category">
+                        <h3>Transportation</h3>
+                        <form class="expense-form">
+                            <input type="number" placeholder="Car payment (optional)" step="0.01" min="0" data-name="Car Payment">
+                            <input type="number" placeholder="Insurance (optional)" step="0.01" min="0" data-name="Car Insurance">
+                            <input type="number" placeholder="Gas/Transit (optional)" step="0.01" min="0" data-name="Gas/Transit">
+                        </form>
+                    </div>
+                    
+                    <div class="expense-category">
+                        <h3>Other</h3>
+                        <form class="expense-form">
+                            <input type="number" placeholder="Phone bill (optional)" step="0.01" min="0" data-name="Phone">
+                            <input type="number" placeholder="Subscriptions (optional)" step="0.01" min="0" data-name="Subscriptions">
+                            <input type="number" placeholder="Other expense (optional)" step="0.01" min="0" data-name="Other">
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="onboarding-buttons">
+                    <button type="button" class="onboarding-btn secondary" onclick="budgetTracker.onboarding.goBack()">Back</button>
+                    <button type="button" class="onboarding-btn primary" onclick="budgetTracker.onboarding.finishExpenses()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Final Summary -->
+            <div id="onboarding-final-summary" class="onboarding-step">
+                <h2>You're Ready!</h2>
+                <div class="summary-breakdown">
+                    <p>Ok, so every month you have:</p>
+                    <div class="summary-line income">
+                        <span>Income:</span>
+                        <span id="finalIncomeAmount">$0</span>
+                    </div>
+                    <div class="summary-line expenses">
+                        <span>Expenses:</span>
+                        <span id="finalExpensesAmount">$0</span>
+                    </div>
+                    <hr>
+                    <div class="summary-line leftover">
+                        <span>Left to spend:</span>
+                        <span id="finalLeftoverAmount">$0</span>
+                    </div>
+                </div>
+                <p class="instructions">Any time you spend money, open this app and add the money you spent. That's all.</p>
+                <p class="peace-of-mind">You'll find this gives you peace of mind - you'll always know where you stand financially.</p>
+                <div class="onboarding-buttons">
+                    <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.finishOnboarding()">Start budgeting!</button>
+                </div>
+            </div>
+
+            <!-- Completion -->
+            <div id="onboarding-complete" class="onboarding-step">
+                <h2>You're all set!</h2>
+                <p>Great! Your budget is ready. You can now start tracking your daily spending and see how much you have left each month.</p>
+                <div class="onboarding-buttons">
+                    <button class="onboarding-btn primary" onclick="budgetTracker.onboarding.finishOnboarding()">Start budgeting!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

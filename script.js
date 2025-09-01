@@ -7,6 +7,11 @@ class BudgetTracker {
         this.loadData();
         this.initializeEventListeners();
         this.updateDisplay();
+        
+        // Check if user needs onboarding
+        if (this.needsOnboarding()) {
+            this.showOnboarding();
+        }
     }
 
     initializeEventListeners() {
@@ -23,6 +28,19 @@ class BudgetTracker {
         document.getElementById('spendingForm').addEventListener('submit', (e) => {
             e.preventDefault();
             this.addDailySpending();
+        });
+
+        // Onboarding form listeners
+        document.getElementById('onboardingIncomeForm').addEventListener('submit', (e) => {
+            this.onboarding.handleIncomeSubmit(e);
+        });
+
+        document.getElementById('onboardingBankForm').addEventListener('submit', (e) => {
+            this.onboarding.handleBankSubmit(e);
+        });
+
+        document.getElementById('onboardingAdditionalForm').addEventListener('submit', (e) => {
+            this.onboarding.handleAdditionalSubmit(e);
         });
     }
 
@@ -399,6 +417,225 @@ class BudgetTracker {
             alert("New month started! Daily spending has been cleared.");
         }
     }
+
+    needsOnboarding() {
+        return this.income.length === 0 && this.fixedExpenses.length === 0 && this.dailySpending.length === 0;
+    }
+
+    showOnboarding() {
+        document.getElementById('onboardingModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    hideOnboarding() {
+        document.getElementById('onboardingModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
+
+// Onboarding functionality
+const onboardingFlow = {
+    currentStep: 'welcome',
+    tempData: {},
+
+    showStep(stepId) {
+        // Hide all steps
+        document.querySelectorAll('.onboarding-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        
+        // Show current step
+        document.getElementById(`onboarding-${stepId}`).classList.add('active');
+        this.currentStep = stepId;
+    },
+
+    goToIncome() {
+        this.showStep('income');
+    },
+
+    goToBankAccount() {
+        this.showStep('bank');
+    },
+
+    goBack() {
+        if (this.currentStep === 'income' || this.currentStep === 'bank') {
+            this.showStep('welcome');
+        } else if (this.currentStep === 'additional') {
+            this.showStep('income');
+        }
+    },
+
+    handleIncomeSubmit(e) {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('onboardingIncomeAmount').value);
+        const name = document.getElementById('onboardingIncomeName').value || 'Main Income';
+        const payDays = document.getElementById('onboardingPayDays').value;
+
+        if (amount > 0) {
+            // Parse pay days - handle formats like "15, 30", "1st and 15th", "30", etc.
+            const parsedDays = this.parsePayDays(payDays);
+            
+            if (parsedDays.length === 0) {
+                // No pay days specified, default to 1st
+                parsedDays.push(1);
+            }
+            
+            // Create separate income entries for each pay day
+            if (parsedDays.length === 1) {
+                // Single pay day - use full amount
+                const incomeEntry = {
+                    id: Date.now(),
+                    day: parsedDays[0],
+                    amount: amount
+                };
+                budgetTracker.income.push(incomeEntry);
+            } else {
+                // Multiple pay days - split amount evenly
+                const amountPerPay = amount / parsedDays.length;
+                parsedDays.forEach((day, index) => {
+                    const incomeEntry = {
+                        id: Date.now() + index,
+                        day: day,
+                        amount: amountPerPay
+                    };
+                    budgetTracker.income.push(incomeEntry);
+                });
+            }
+            
+            this.showStep('additional');
+        }
+    },
+
+    parsePayDays(payDaysStr) {
+        if (!payDaysStr || payDaysStr.trim() === '') {
+            return [];
+        }
+        
+        // Clean the string and extract numbers
+        const days = [];
+        const cleanStr = payDaysStr.toLowerCase().replace(/[^0-9,\s]/g, '');
+        const numbers = cleanStr.split(/[,\s]+/).filter(n => n !== '');
+        
+        numbers.forEach(numStr => {
+            const day = parseInt(numStr);
+            if (day >= 1 && day <= 31) {
+                days.push(day);
+            }
+        });
+        
+        // Remove duplicates and sort
+        return [...new Set(days)].sort((a, b) => a - b);
+    },
+
+    handleBankSubmit(e) {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('onboardingBankAmount').value);
+
+        if (amount > 0) {
+            // Add as income for this month
+            const incomeEntry = {
+                id: Date.now(),
+                day: 1,
+                amount: amount,
+                name: 'Starting Balance'
+            };
+            
+            budgetTracker.income.push(incomeEntry);
+            this.showStep('additional');
+        }
+    },
+
+    addAdditionalIncome() {
+        document.getElementById('additionalIncomeForm').style.display = 'block';
+    },
+
+    handleAdditionalSubmit(e) {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('onboardingAdditionalAmount').value);
+        const name = document.getElementById('onboardingAdditionalName').value || 'Additional Income';
+        const days = document.getElementById('onboardingAdditionalDays').value;
+
+        if (amount > 0) {
+            const incomeEntry = {
+                id: Date.now(),
+                day: 15, // Default to mid-month
+                amount: amount,
+                name: name,
+                payDays: days
+            };
+            
+            budgetTracker.income.push(incomeEntry);
+            
+            // Clear form
+            e.target.reset();
+            alert('Additional income added! You can add more or continue.');
+        }
+    },
+
+    skipAdditional() {
+        this.goToIncomeSummary();
+    },
+
+    goToIncomeSummary() {
+        // Calculate total income
+        const totalIncome = budgetTracker.income.reduce((sum, entry) => sum + entry.amount, 0);
+        document.getElementById('totalIncomeAmount').textContent = `$${totalIncome.toFixed(2)}`;
+        this.showStep('income-summary');
+    },
+
+    goToExpenses() {
+        this.showStep('expenses');
+    },
+
+    finishExpenses() {
+        // Collect all expense inputs and add them
+        const expenseInputs = document.querySelectorAll('.expense-form input');
+        expenseInputs.forEach(input => {
+            const amount = parseFloat(input.value);
+            const name = input.dataset.name;
+            
+            if (amount > 0 && name) {
+                const expenseEntry = {
+                    id: Date.now() + Math.random(), // Ensure unique IDs
+                    amount: amount,
+                    day: null,
+                    description: name
+                };
+                budgetTracker.fixedExpenses.push(expenseEntry);
+            }
+        });
+        
+        this.showFinalSummary();
+    },
+
+    showFinalSummary() {
+        const totalIncome = budgetTracker.income.reduce((sum, entry) => sum + entry.amount, 0);
+        const totalExpenses = budgetTracker.fixedExpenses.reduce((sum, entry) => sum + entry.amount, 0);
+        const leftover = totalIncome - totalExpenses;
+        
+        document.getElementById('finalIncomeAmount').textContent = `$${totalIncome.toFixed(2)}`;
+        document.getElementById('finalExpensesAmount').textContent = `$${totalExpenses.toFixed(2)}`;
+        document.getElementById('finalLeftoverAmount').textContent = `$${leftover.toFixed(2)}`;
+        
+        // Color the leftover amount
+        const leftoverElement = document.getElementById('finalLeftoverAmount');
+        if (leftover < 0) {
+            leftoverElement.style.color = 'var(--danger)';
+        } else {
+            leftoverElement.style.color = 'var(--success)';
+        }
+        
+        this.showStep('final-summary');
+    },
+
+    finishOnboarding() {
+        budgetTracker.saveData();
+        budgetTracker.updateDisplay();
+        budgetTracker.hideOnboarding();
+    }
+};
+
+// Add onboarding to budget tracker
+BudgetTracker.prototype.onboarding = onboardingFlow;
 
 const budgetTracker = new BudgetTracker();
