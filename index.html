@@ -14,8 +14,12 @@
                 <button class="new-month-btn" onclick="budgetTracker.newMonth()">New Month</button>
             </div>
             <div class="remaining-budget">
-                <span class="label">Remaining Budget:</span>
+                <span class="label">Remaining Budget</span>
                 <span class="amount" id="remainingAmount">$0.00</span>
+                <div class="budget-details">
+                    <span class="days-left" id="daysLeft">0 days left in month</span>
+                    <span class="daily-allowance">You can spend <span id="dailyAllowance">$0.00</span> per day</span>
+                </div>
             </div>
         </header>
 

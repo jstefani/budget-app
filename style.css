@@ -103,10 +103,37 @@ h1 {
     font-weight: 700;
     color: var(--success);
     letter-spacing: -0.02em;
+    display: block;
+    margin-bottom: 12px;
 }
 
 .remaining-budget .amount.negative {
     color: var(--danger);
+}
+
+.budget-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.days-left {
+    font-size: 12px;
+    color: var(--text-light);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.daily-allowance {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.daily-allowance span {
+    font-weight: 700;
+    font-size: 16px;
 }
 
 main {
@@ -359,6 +386,18 @@ button:active {
 
     .remaining-budget .amount {
         font-size: 28px;
+    }
+    
+    .days-left {
+        font-size: 11px;
+    }
+    
+    .daily-allowance {
+        font-size: 13px;
+    }
+    
+    .daily-allowance span {
+        font-size: 15px;
     }
 
     main {

@@ -149,6 +149,36 @@ class BudgetTracker {
         } else {
             remainingElement.className = 'amount';
         }
+
+        // Calculate and display days left and daily allowance
+        const daysLeft = this.getDaysLeftInMonth();
+        const dailyAllowance = daysLeft > 0 ? remaining / daysLeft : 0;
+        
+        document.getElementById('daysLeft').textContent = 
+            daysLeft === 1 ? '1 day left in month' : `${daysLeft} days left in month`;
+        
+        const dailyAllowanceElement = document.getElementById('dailyAllowance');
+        dailyAllowanceElement.textContent = `$${Math.max(0, dailyAllowance).toFixed(2)}`;
+        
+        // Color the daily allowance based on whether it's positive or negative budget
+        if (remaining < 0) {
+            dailyAllowanceElement.style.color = 'var(--danger)';
+        } else {
+            dailyAllowanceElement.style.color = 'var(--success)';
+        }
+    }
+
+    getDaysLeftInMonth() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const today = now.getDate();
+        
+        // Get last day of current month
+        const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+        
+        // Days left including today
+        return lastDayOfMonth - today + 1;
     }
 
     displayIncome() {
