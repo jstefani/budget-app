@@ -481,26 +481,15 @@ const onboardingFlow = {
             }
             
             // Create separate income entries for each pay day
-            if (parsedDays.length === 1) {
-                // Single pay day - use full amount
+            // Each pay day gets the FULL amount (not split)
+            parsedDays.forEach((day, index) => {
                 const incomeEntry = {
-                    id: Date.now(),
-                    day: parsedDays[0],
+                    id: Date.now() + index,
+                    day: day,
                     amount: amount
                 };
                 budgetTracker.income.push(incomeEntry);
-            } else {
-                // Multiple pay days - split amount evenly
-                const amountPerPay = amount / parsedDays.length;
-                parsedDays.forEach((day, index) => {
-                    const incomeEntry = {
-                        id: Date.now() + index,
-                        day: day,
-                        amount: amountPerPay
-                    };
-                    budgetTracker.income.push(incomeEntry);
-                });
-            }
+            });
             
             this.showStep('additional');
         }
